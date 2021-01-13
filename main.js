@@ -1,57 +1,81 @@
-const addButton = document.querySelector('.addButton');
-var input = document.querySelector('input');
-const container = document.querySelector('.container');
+showTask();
+let takeInput = document.getElementById("input");
+let addBtn = document.getElementById("inputBtn");
 
-class item{
-    constructor(itemName){
-        this.createDiv(itemName);
-    }
-    createDiv(itemName){
-        let input = document.createElement('input');
-        input.value = itemName;
-        input.disabled = true;
-        input.classList.add('item_input');
-        input.type = "text";
-
-        let itemBox = document.createElement('div');
-        itemBox.classList.add('item');
-
-        let editButton = document.createElement('button');
-        editButton.innerHTML = "EDIT";
-        editButton.classList.add('editButton');
-
-        let removeButton = document.createElement('button');
-        removeButton.innerHTML = "REMOVE";
-        removeButton.classList.add('removeButton');
-
-        container.appendChild(itemBox);
-
-        itemBox.appendChild(input);
-        itemBox.appendChild(editButton);
-        itemBox.appendChild(removeButton);
-
-        editButton.addEventListener('click' , () => this.edit(input));
-
-        removeButton.addEventListener('click' , () => this.remove(itemBox));
-    }   
-    edit(input){
-        input.disabled = !input.disabled;
-    }
-    remove(item){
-        container.removeChild(item);
-    }
-}
-
-function check(){
-    if(input.value != ""){
-        new item(input.value);
-        input.value == "";
-    }
-}
-
-addButton.addEventListener('click' , check);
-window.addEventListener('keydown' , (e) => {
-    if(e.which == 13){
-        check();
-    }
+addBtn.addEventListener("click" , function(){
+     takeInputvalue = takeInput.value;
+     if(takeInputvalue.trim() != 0){
+ let webTask = localStorage.getItem("localtask");
+     if(webTask == null){
+          taskObj = [];
+     }
+     else{
+          taskObj = JSON.parse(webTask);
+     }
+     taskObj.push(takeInputvalue);
+     localStorage.setItem("localtask" , JSON.stringify(taskObj));
+     }
+     showTask();
 })
+
+function showTask()
+{
+     let webTask = localStorage.getItem("localtask");
+     if(webTask == null){
+          taskObj = [];
+     }
+     else{
+          taskObj = JSON.parse(webTask);
+     }
+
+     let html = '';
+     let addtasktoList = document.getElementById("containerId");
+
+     taskObj.forEach((item , index) => {
+          html += `  <div class="item">
+          <input type="text" class="item_input" value="${item}" disabled>
+          <button class="editButton" title="Edit" onclick="editTask(${index})"><i class="fas fa-edit"></i></button>
+          <button class="removeButton" title="Delete" onclick="deleteItem(${index})"><i class="fas fa-trash-alt"></i></button>
+      </div>`
+     });
+     addtasktoList.innerHTML = html;
+}
+
+function editTask(index)
+{
+     let saveindex = document.getElementById("saveIndex");
+     let addBtn = document.getElementById("inputBtn");
+     let saveBtn = document.getElementById("saveBtn");
+     saveindex.value = index;
+     let webTask = localStorage.getItem("localtask");
+     let taskObj = JSON.parse(webTask);
+     takeInput.value = taskObj[index]; 
+     addBtn.style.display="none";
+     saveBtn.style.display="block"; 
+}
+
+//save
+let saveBtn = document.getElementById("saveBtn");
+
+saveBtn.addEventListener("click" , function(){
+     let addBtn = document.getElementById("inputBtn");
+     let webTask = localStorage.getItem("localtask");
+     let taskObj = JSON.parse(webTask);
+     let saveindex = document.getElementById("saveIndex").value;
+     taskObj[saveindex] = takeInput.value;
+     saveBtn.style.display = "none";
+     addBtn.style.display = "block";
+     takeInput.value = '';
+     localStorage.setItem("localtask" , JSON.stringify(taskObj));
+     showTask();
+})
+
+//Delete Task
+function deleteItem(index)
+{
+     let webTask = localStorage.getItem("localtask");
+     let taskObj = JSON.parse(webTask);
+     taskObj.splice(index , 1); 
+     localStorage.setItem("localtask" , JSON.stringify(taskObj));
+     showTask(); 
+}
